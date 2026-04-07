@@ -9,20 +9,21 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: #0f172a;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            color: white;
         }
 
         .container {
             width: 420px;
-            background: #1e293b;
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border-radius: 15px;
             padding: 20px;
-            color: white;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
         }
 
         h2 {
@@ -31,26 +32,33 @@
         }
 
         .chat {
-            height: 300px;
+            height: 320px;
             overflow-y: auto;
-            border: 1px solid #334155;
             padding: 10px;
             margin-bottom: 10px;
-            border-radius: 8px;
-            background: #020617;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
         }
 
         .msg {
-            margin: 6px 0;
-            padding: 6px;
+            margin: 8px 0;
+            padding: 8px 10px;
+            border-radius: 10px;
+            max-width: 80%;
         }
 
         .user {
-            color: #38bdf8;
+            background: #00c6ff;
+            color: black;
+            margin-left: auto;
+            text-align: right;
         }
 
         .bot {
-            color: #22c55e;
+            background: #00ff9f;
+            color: black;
+            margin-right: auto;
+            text-align: left;
         }
 
         .input-box {
@@ -61,22 +69,28 @@
         input {
             flex: 1;
             padding: 10px;
-            border-radius: 6px;
+            border-radius: 10px;
             border: none;
             outline: none;
         }
 
         button {
             padding: 10px 15px;
-            background: #22c55e;
+            border-radius: 10px;
             border: none;
-            border-radius: 6px;
+            background: linear-gradient(45deg, #ff6b6b, #f06595);
             color: white;
+            font-weight: bold;
             cursor: pointer;
         }
 
         button:hover {
-            background: #16a34a;
+            opacity: 0.8;
+        }
+
+        .typing {
+            font-style: italic;
+            opacity: 0.7;
         }
     </style>
 </head>
@@ -102,13 +116,18 @@
             const message = input.value.trim();
             if (!message) return;
 
-            // Show user message
-            addMessage("You: " + message, "user");
-
+            addMessage("🧑 " + message, "user");
             input.value = "";
 
+            // Show typing effect
+            const typingDiv = document.createElement("div");
+            typingDiv.className = "msg bot typing";
+            typingDiv.innerText = "🤖 Typing...";
+            chat.appendChild(typingDiv);
+            chat.scrollTop = chat.scrollHeight;
+
             try {
-                const res = await fetch("http://localhost:5000/api/chat", {
+                const res = await fetch("https://YOUR-BACKEND-URL/api/chat", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -118,11 +137,13 @@
 
                 const data = await res.json();
 
-                // Show AI response
-                addMessage("AI: " + data.reply, "bot");
+                typingDiv.remove(); // remove typing
+
+                addMessage("🤖 " + data.reply, "bot");
 
             } catch (err) {
-                addMessage("❌ Error connecting to server", "bot");
+                typingDiv.remove();
+                addMessage("❌ Server error", "bot");
             }
         }
 
@@ -134,7 +155,6 @@
             div.innerText = text;
 
             chat.appendChild(div);
-
             chat.scrollTop = chat.scrollHeight;
         }
     </script>
